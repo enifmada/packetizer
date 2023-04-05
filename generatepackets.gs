@@ -7,6 +7,8 @@ function generateQuizBowlPackets() {
   "Other": "https://docs.google.com/document/d/1wMHAKr75PFoqWAyXiRCR13RFFB6faxv1RkgUj6N30fA/edit",}
 
   var extraRow = true;
+  var writerTags = true;
+
   if (extraRow){skiprows = 2;}
   else{skiprows = 1;}
 
@@ -86,17 +88,22 @@ function generateQuizBowlPackets() {
         }
         var tubody = searchPar.getPreviousSibling();
         var tuans = tubody.getNextSibling();
-        var tuattr = tuans.getNextSibling();
         newtossup = tubody.copy();
         newtext = newtossup.insertText(0, (tossup+1) + ". ");
         newtext.setAttributes(newtossup.getAttributes());
-        newend = tuattr.copy();
-        newend.appendText("\n");
         newtossup_par = packetBody.appendParagraph(newtossup);
         newtossup_par.setFontSize(10);
         newtossup_par.setFontFamily("Times New Roman");
         packetBody.appendParagraph(tuans.copy());
-        packetBody.appendParagraph(newend);
+        if (writerTags){
+          var tuattr = tuans.getNextSibling();
+          newend = tuattr.copy();
+          newend.appendText("\n");
+          packetBody.appendParagraph(newend);
+        }
+        else{
+          packetBody.appendParagraph("");
+        }
       }
       else{
         var docPars = docBody.getParagraphs();
@@ -114,19 +121,25 @@ function generateQuizBowlPackets() {
               newtossup = docPars[i-1].copy();
               newtext = newtossup.insertText(0, (tossup+1) + ". ");
               newtext.setAttributes(newtossup.getAttributes());
-              newend = docPars[i+1].copy();
-              newend.appendText("\n");
+
               newtossup_par = packetBody.appendParagraph(newtossup);
               newtossup_par.setFontSize(10);
               newtossup_par.setFontFamily("Times New Roman");
               packetBody.appendParagraph(docPars[i].copy());
-              packetBody.appendParagraph(newend);
+              if (writerTags){
+                newend = docPars[i+1].copy();
+                newend.appendText("\n");
+                packetBody.appendParagraph(newend);
+              }
+              else{
+                packetBody.appendParagraph("");
+              }
               break;
             }
           }
           if (i === docPars.length-1){
             packetBody.appendParagraph("TOSSUP " + (tossup+1) + " NOT FOUND: " + data[indexTU+skiprows][round].trim() + " (" + categoryNameTU + ")\n");
-            tu_sheet.getRange(indexTU+1+skiprows,round+1,1,1).setBackground("#ffbbbbb");
+            tu_sheet.getRange(indexTU+1+skiprows,round+1,1,1).setBackground("#ffbbbb");
             allfound = false;
           }
         }
@@ -157,9 +170,14 @@ function generateQuizBowlPackets() {
           packetBody.appendParagraph(par.copy());
           par = par.getNextSibling();
         }
+        if (writerTags){
         newend = par.copy();
         newend.appendText("\n");
         packetBody.appendParagraph(newend);
+        }
+        else{
+          packetBody.appendParagraph("");
+        }
       }
       else{
         var docPars = docBody.getParagraphs();
@@ -175,9 +193,14 @@ function generateQuizBowlPackets() {
           if (paranswer === categoryAnswerBO.substr(8).toLowerCase() || paranswer === categoryAnswerBO.substr(8).toLowerCase() + "s"){
             for (var bi = -2; bi < 5; bi++){
               packetBody.appendParagraph(docPars[i+bi].copy());}
+            if (writerTags){
             newend = docPars[i+5].copy();
             newend.appendText("\n")
             packetBody.appendParagraph(newend);
+            }
+            else{
+              packetBody.appendParagraph("");
+            }
             break;
           }
         }
