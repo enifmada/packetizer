@@ -30,7 +30,7 @@ function generateQuizBowlPackets() {
   var packets = [];
   
   // Loop through each round
-  for (var round = 1; round <= 1; round++) {
+  for (var round = 1; round <= numRounds; round++) {
     var packetDoc = DocumentApp.create("CMST II - Round " + round);
     var packetBody = packetDoc.getBody();
     var tournament_header = "2022 CMST II";
