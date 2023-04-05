@@ -1,5 +1,4 @@
 function generateQuizBowlPackets() {
-  // Get the active spreadsheet
   var category_id_dict = {"History": "https://docs.google.com/document/d/1YHxCwYBoccp3w9fmiN98DpDd61YiP3KC1tg86dt3jmo/edit",
   "Literature": "https://docs.google.com/document/d/1YHxCwYBoccp3w9fmiN98DpDd61YiP3KC1tg86dt3jmo/edit",
   "Science": "https://docs.google.com/document/d/1AqY1XK6J5JkpCILR7Qcj3BNtP1DGLS15sAyu8BdUNVM/edit",
@@ -7,6 +6,11 @@ function generateQuizBowlPackets() {
   "Thought": "https://docs.google.com/document/d/1sEkC0pFniPyMrfrzIz9fWgV1ulNJxpKIz8PL_9YQQhI/edit",
   "Other": "https://docs.google.com/document/d/1wMHAKr75PFoqWAyXiRCR13RFFB6faxv1RkgUj6N30fA/edit",}
 
+  var extraRow = true;
+  if (extraRow){skiprows = 2;}
+  else{skiprows = 1;}
+
+  // Get the active spreadsheet
   var tu_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Packets TU");
   var bo_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Packets Bonus");
   
@@ -20,13 +24,13 @@ function generateQuizBowlPackets() {
   
   // Get the number of rounds and categories
   var numRounds = data[0].length-1;
-  var numCategories = data.length - 2;
+  var numCategories = data.length - skiprows;
   
   // Create an empty array to hold the packets
   var packets = [];
   
   // Loop through each round
-  for (var round = 1; round <= numRounds; round++) {
+  for (var round = 1; round <= 1; round++) {
     var packetDoc = DocumentApp.create("CMST II - Round " + round);
     var packetBody = packetDoc.getBody();
     var tournament_header = "2022 CMST II";
@@ -43,13 +47,11 @@ function generateQuizBowlPackets() {
     packetBody.appendParagraph(editors_header);
 
     var allfound = true;
-    bo_sheet.getRange(3,round+1, numCategories-3).setBackground("880000");
-    tu_sheet.getRange(3,round+1,numCategories-3).setBackground("880000");
 
     orderedCats = [];
-    for (var vi = 1; vi <= numCategories; vi++)
+    for (var vi = 0; vi < numCategories; vi++)
     {
-      orderedCats.push(data[vi+1][0].trim());
+      orderedCats.push(data[vi+skiprows][0].trim());
     }
 
     var ordered_copy = [...orderedCats];
@@ -61,9 +63,9 @@ function generateQuizBowlPackets() {
       // Get the document for this category
       var indexTU = orderedCats.indexOf(tus[tossup]);
       var indexBO = orderedCats.indexOf(bos[tossup]);
-      var categoryNameTU = data[indexTU+2][0];
+      var categoryNameTU = data[indexTU+skiprows][0];
       var metaCategoryTU = categoryNameTU.split("-")[0].trim();
-      var baseAnswerTU = data[indexTU+2][round].split("!")[0].split("{")[0].trim();
+      var baseAnswerTU = data[indexTU+skiprows][round].split("!")[0].split("{")[0].trim();
       var capsAnswerTU = "";
       var splitanswer = baseAnswerTU.split(" ");
       for (wordi = 0; wordi < splitanswer.length; wordi++){
@@ -95,7 +97,6 @@ function generateQuizBowlPackets() {
         newtossup_par.setFontFamily("Times New Roman");
         packetBody.appendParagraph(tuans.copy());
         packetBody.appendParagraph(newend);
-        tu_sheet.getRange(indexTU+2,round+1,1,1).setBackground("008888");
       }
       else{
         var docPars = docBody.getParagraphs();
@@ -120,19 +121,19 @@ function generateQuizBowlPackets() {
               newtossup_par.setFontFamily("Times New Roman");
               packetBody.appendParagraph(docPars[i].copy());
               packetBody.appendParagraph(newend);
-              tu_sheet.getRange(indexTU+2,round+1,1,1).setBackground("008888");
               break;
             }
           }
           if (i === docPars.length-1){
-            packetBody.appendParagraph("TOSSUP " + (tossup+1) + " NOT FOUND: " + data[indexTU+2][round].trim() + " (" + categoryNameTU + ")\n");
+            packetBody.appendParagraph("TOSSUP " + (tossup+1) + " NOT FOUND: " + data[indexTU+skiprows][round].trim() + " (" + categoryNameTU + ")\n");
+            tu_sheet.getRange(indexTU+1+skiprows,round+1,1,1).setBackground("#ffbbbbb");
             allfound = false;
           }
         }
       }
-      var categoryNameBO = bodata[indexBO+2][0];
+      var categoryNameBO = bodata[indexBO+skiprows][0];
       var metaCategoryBO = categoryNameBO.split("-")[0].trim();
-      var baseAnswerBO = bodata[indexBO+2][round].split("/")[0].split("!")[0].split("{")[0].trim();
+      var baseAnswerBO = bodata[indexBO+skiprows][round].split("/")[0].split("!")[0].split("{")[0].trim();
       var capsAnswerBO = "";
       var splitanswer = baseAnswerBO.split(" ");
       for (wordi = 0; wordi < splitanswer.length; wordi++){
@@ -159,7 +160,6 @@ function generateQuizBowlPackets() {
         newend = par.copy();
         newend.appendText("\n");
         packetBody.appendParagraph(newend);
-        bo_sheet.getRange(indexBO+2,round+1,1,1).setBackground("008888");
       }
       else{
         var docPars = docBody.getParagraphs();
@@ -178,12 +178,12 @@ function generateQuizBowlPackets() {
             newend = docPars[i+5].copy();
             newend.appendText("\n")
             packetBody.appendParagraph(newend);
-            bo_sheet.getRange(indexBO+2,round+1,1,1).setBackground("008888");
             break;
           }
         }
         if (i === docPars.length-1){
-          packetBody.appendParagraph("BONUS " + (tossup+1) + " NOT FOUND: " + bodata[indexBO+2][round].trim() + " (" +           categoryNameBO + ")\n");
+          packetBody.appendParagraph("BONUS " + (tossup+1) + " NOT FOUND: " + bodata[indexBO+skiprows][round].trim() + " (" +           categoryNameBO + ")\n");
+          bo_sheet.getRange(indexBO+1+skiprows,round+1,1,1).setBackground("#ffbbbb");
           allfound = false;}
         }
       }
